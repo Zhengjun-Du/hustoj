@@ -4,7 +4,7 @@
     $THEME_MOD = "light"; //light or dark
     $THEME_BANNER = "hidden"; //show or hidden
     $THEME_HOME_STATISTICS = "hidden"; //show or hidden
-    $THEME_AUTO_GET_LATEST_INFO = "yes"; // yes or no.Will use ajax to get information. Here is the code.
+    $THEME_AUTO_GET_LATEST_INFO = "no"; // yes or no.Will use ajax to get information. Here is the code.
     /*
     $.ajax({url:"https://vt-dev-team.github.io/bshark/version",async:false}).responseText
     */
