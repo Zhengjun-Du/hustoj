@@ -35,7 +35,7 @@ if(isset($scope)){
 }
 for($i = 0; $i <$view_total ; $i += $page_size) {
 	echo "<li class=\"page-item";
-	if ($i == $_GET['start']) {
+	if (isset($_GET['start']) && $i == $_GET['start']) {
 	    echo " active";
 	}
 	echo "\"><a class=\"page-link\" href='./ranklist.php?start=" . strval ( $i ).$qs. "'>";
@@ -87,7 +87,7 @@ if(isset($scope)){
 }
 for($i = 0; $i <$view_total ; $i += $page_size) {
 	echo "<li class=\"page-item";
-	if ($i == $_GET['start']) {
+	if (isset($_GET['start']) && $i == $_GET['start']) {
 	    echo " active";
 	}
 	echo "\"><a class=\"page-link\" href='./ranklist.php?start=" . strval ( $i ).$qs. "'>";

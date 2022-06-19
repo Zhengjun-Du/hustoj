@@ -13,7 +13,7 @@
             <div class="card">
   <div class="card-body">
     <h4><?php echo $MSG_STATUS;?></h4>
-    <?php if ($cid) { ?>
+    <?php if (isset($cid) && $cid) { ?>
     
     <ul class="pagination">
     <li class="page-item"><a class="page-link" href='contest.php?cid=<?php echo $view_cid?>'><?php echo $MSG_CONTEST;?>C<?php echo $cid;?></a></li>

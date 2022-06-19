@@ -13,7 +13,7 @@
             <div class='card'>
   <div class="card-body">
     <h4><?php echo $MSG_PROBLEMS;?></h4>
-				<?php if (!$_GET["search"]) { ?>
+				<?php if (!isset($_GET["search"])) { ?>
     <ul class="pagination">
 						<li class="page-item"><a class="page-link" href="problemset.php?page=1">&lt;&lt;</a>
 						</li>
@@ -76,7 +76,7 @@
 						}
 						?>
 					</tbody>
-</table><?php if (!$_GET["search"]) { ?><ul class="pagination">
+</table><?php if (!isset($_GET["search"])) { ?><ul class="pagination">
 						<li class="page-item"><a class="page-link" href="problemset.php?page=1">&lt;&lt;</a>
 						</li>
 						<?php

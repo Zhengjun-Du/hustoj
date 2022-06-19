@@ -156,7 +156,7 @@ echo pdo_query('select * from `users` order by `reg_time` DESC limit 1')[0]['use
                 <td><a href="contest.php?cid=<?php echo $new['contest_id'];?>"><?php echo $new['title'];?></a></td> 
                 <td><?php if (strtotime($new['end_time'])<time()) { ?><span class="badge badge-secondary"><?php echo $MSG_Ended;?></span><?php }
                 else if (strtotime($new['start_time'])>time()) { ?><span class="badge badge-success">未开始</span><?php }
-                else { ?><span class="badge badge-danger"><?php echo $MSG_Runnning;?></span><?php } ?></td>
+                else { ?><span class="badge badge-danger"><?php echo isset($MSG_Runnning) ? $MSG_Runnning : '';?></span><?php } ?></td>
                 <td><?php echo $new['start_time'];?></td>
             </tr>
             <?php } ?>
