@@ -94,11 +94,11 @@ $str2 = "";
 $lock = false;
 $lock_time = date("Y-m-d H:i:s",time());
 
-$sql = "WHERE problem_id>0 ";
+$sql = "WHERE solution.problem_id>0 ";
 
 if (isset($_GET['cid'])) {
   $cid = intval($_GET['cid']);
-  $sql = $sql." AND `contest_id`='$cid' and num>=0 ";
+  $sql = $sql." AND solution.`contest_id`='$cid' and solution.num>=0 ";
   $str2 = $str2."&cid=$cid";
   $sql_lock = "SELECT `start_time`,`title`,`end_time` FROM `contest` WHERE `contest_id`=?";
   $result = pdo_query($sql_lock,$cid);
@@ -151,22 +151,22 @@ else {
 	&&(isset($_GET['user_id'])&&$_GET['user_id']==$_SESSION[$OJ_NAME.'_'.'user_id']))
   ){
     if(isset($_SESSION[$OJ_NAME.'_'.'source_browser'])){
-                  $sql="WHERE problem_id>0  ";
+                  $sql="WHERE solution.problem_id>0  ";
     }else if ($_SESSION[$OJ_NAME.'_'.'user_id']!="guest")
-                  $sql="WHERE (contest_id=0 or contest_id is null)  ";
+                  $sql="WHERE (solution.contest_id=0 or solution.contest_id is null)  ";
     }else{
-        $sql="WHERE problem_id>0 and (contest_id=0 or contest_id is null) ";
+        $sql="WHERE solution.problem_id>0 and (solution.contest_id=0 or solution.contest_id is null) ";
     }
 }
 
 $start_first = true;
-$order_str = " ORDER BY `solution_id` DESC ";
+$order_str = " ORDER BY solution.`solution_id` DESC ";
 
 // check the top arg
 if (isset($_GET['top'])) {
   $top = strval(intval($_GET['top']));
   if ($top!=-1)
-    $sql = $sql."AND `solution_id`<='".$top."' ";
+    $sql = $sql."AND solution.`solution_id`<='".$top."' ";
 }
 
 // check the problem arg
@@ -176,13 +176,13 @@ if (isset($_GET['problem_id']) && $_GET['problem_id']!="") {
     $problem_id = htmlentities($_GET['problem_id'],ENT_QUOTES,'UTF-8');
     $num = array_search($problem_id,$PID);
     $problem_id = $PID[$num];
-    $sql = $sql."AND `num`='".$num."' ";
+    $sql = $sql."AND solution.`num`='".$num."' ";
     $str2 = $str2."&problem_id=".trim($problem_id);
   }
   else {
     $problem_id = strval(intval($_GET['problem_id']));
     if ($problem_id!='0') {
-      $sql = $sql."AND `problem_id`='".$problem_id."' ";
+      $sql = $sql."AND solution.`problem_id`='".$problem_id."' ";
       $str2 = $str2."&problem_id=".trim($problem_id);
     }
     else
@@ -201,7 +201,7 @@ if (isset($OJ_ON_SITE_CONTEST_ID)&&$OJ_ON_SITE_CONTEST_ID>0&&!isset($_SESSION[$O
 if (isset($_GET['user_id'])) {
   $user_id = trim($_GET['user_id']);
   if ( $user_id!="" && is_valid_user_name($user_id)) {
-      $sql = $sql."AND `user_id`=? ";
+      $sql = $sql."AND solution.`user_id`=? ";
       if ($str2!="")
       		$str2 = $str2."&";
       $str2 = $str2."user_id=".urlencode($user_id);
@@ -220,7 +220,7 @@ if ($language>count($language_ext) || $language<0)
   $language = -1;
 
 if ($language!=-1) {
-  $sql = $sql."AND `language`='".($language)."' ";
+  $sql = $sql."AND solution.`language`='".($language)."' ";
   $str2 = $str2."&language=".$language;
 }
 
@@ -233,13 +233,15 @@ if ($result>12 || $result<0)
   $result = -1;
 
 if ($result!=-1 && !$lock) {
-  $sql = $sql."AND `result`='".($result)."' ";
+  $sql = $sql."AND solution.`result`='".($result)."' ";
   $str2 = $str2."&jresult=".$result;
 }
 
 if ($OJ_SIM) {
   //$old=$sql;
-  $sql = "select * from solution solution left join `sim` sim on solution.solution_id=sim.s_id ".$sql;
+  $sql = "select solution.*, sim.*, sim_solution.user_id as sim_user_id from solution solution 
+  left join `sim` sim on solution.solution_id=sim.s_id 
+  left join `solution` sim_solution on sim_solution.solution_id = sim.sim_s_id ".$sql;
   if (isset($_GET['showsim']) && intval($_GET['showsim'])>0) {
     $showsim = intval($_GET['showsim']);
     $sql .= " and sim.sim>=$showsim";
@@ -409,10 +411,10 @@ for ($i=0; $i<$rows_cnt; $i++) {
           $view_status[$i][3] .= "</a>";
 
         if( isset($_SESSION[$OJ_NAME.'_'.'source_browser'])) {
-          $view_status[$i][3] .= "<a href=comparesource.php?left=".$row['sim_s_id']."&right=".$row['solution_id']." class='label label-info' target=original>".$row['sim_s_id']."(".$row['sim']."%)</a>";
+          $view_status[$i][3] .= "<a href=comparesource.php?left=".$row['sim_s_id']."&right=".$row['solution_id']." class='label label-info' target=original>".$row['sim_s_id']."(".$row['sim_user_id'].":".$row['sim']."%)</a>";
         }
         else {
-          $view_status[$i][3] .= "<span class='label label-info'>".$row['sim_s_id']."</span>";
+          $view_status[$i][3] .= "<span class='label label-info'>".$row['sim_s_id']."(".$row['sim_user_id'].")"."</span>";
         }
         
         if (isset($_GET['showsim']) && isset($row['sim_s_id'])) {
