@@ -55,11 +55,11 @@ $cur_path = "template/$OJ_TEMPLATE/";
           <?php $if_new_mail = count(pdo_query('select * from `mail` where `to_user`=? and `new_mail`=1',$_SESSION[$OJ_NAME.'_'.'user_id']))>0?1:0; ?>
       <a class="nav-link dropdown-toggle" href="" id="navbardrop" data-toggle="dropdown"><i class="iconfont icon-user"></i>
         <span style="position:relative" <?php 
-                        if ($viplevel[$_SESSION[$OJ_NAME.'_'.'user_id']]) {
-                            if ($isadmm[$_SESSION[$OJ_NAME.'_'.'user_id']]==23333) echo ' class="purple-c"';
+                        if (isset($viplevel) && $viplevel[$_SESSION[$OJ_NAME.'_'.'user_id']]) {
+                            if (isset($isadmm) && $isadmm[$_SESSION[$OJ_NAME.'_'.'user_id']]==23333) echo ' class="purple-c"';
                             else echo ' class="colorful"';
                         }
-                        else if ($isadmm[$_SESSION[$OJ_NAME.'_'.'user_id']]==23333) echo ' class="purple"';
+                        else if (isset($isadmm) && $isadmm[$_SESSION[$OJ_NAME.'_'.'user_id']]==23333) echo ' class="purple"';
           ?>><?php echo $_SESSION[$OJ_NAME.'_'.'user_id'];?></span>
         <span class="line"></span>
       </a>
