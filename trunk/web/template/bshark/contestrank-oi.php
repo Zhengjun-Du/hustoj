@@ -71,7 +71,7 @@ if(isset($U[$i])){
 if (isset($U[$i]->p_ac_sec[$j])&&$U[$i]->p_ac_sec[$j]>0)
 echo sec2str($U[$i]->p_ac_sec[$j]);
 else if (isset($U[$i]->p_wa_num[$j])&&$U[$i]->p_wa_num[$j]>0)
-echo "(+"+$U[$i]->p_pass_rate[$j]*100+")";
+echo "(+"+(floatval($U[intval($i)]->p_pass_rate[intval($j)])*100)+")";
 }
 }
 echo "</tr>\n";
