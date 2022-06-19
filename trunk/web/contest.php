@@ -326,12 +326,12 @@ else {
     else if ($now<$start_time) {
 			//pending
 			$view_contest[$i][2] = "<span class=text-success>$MSG_Start</span>"." ".$row['start_time']."&nbsp;";
-			$view_contest[$i][2] .= "<span class=text-success>$MSG_TotalTime</span>"." ".formatTimeLength($length);
+			$view_contest[$i][2] .= "<br /><span class=text-success>$MSG_TotalTime</span>"." ".formatTimeLength($length);
 		}
 		else {
 			//running
 			$view_contest[$i][2] = "<span class=text-danger>$MSG_Running</span>"." ".$row['start_time']."&nbsp;";
-			$view_contest[$i][2] .= "<span class=text-danger>$MSG_LeftTime</span>"." ".formatTimeLength($left)."</span>";
+			$view_contest[$i][2] .= "<br /><span class=text-danger>$MSG_LeftTime</span>"." ".formatTimeLength($left)."</span>";
     }
 
     $private = intval($row['private']);
