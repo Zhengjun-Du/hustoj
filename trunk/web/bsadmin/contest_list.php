@@ -89,10 +89,10 @@ $sql = "";
 if(isset($_GET['keyword']) && $_GET['keyword']!=""){
   $keyword = $_GET['keyword'];
   $keyword = "%$keyword%";
-  $sql = "SELECT `contest_id`,`title`,`start_time`,`end_time`,`private`,`defunct` FROM `contest` WHERE (title LIKE ?) OR (description LIKE ?) ORDER BY `contest_id` DESC";
+  $sql = "SELECT `contest_id`,`title`,`start_time`,`end_time`,`private`,`defunct`,`type` FROM `contest` WHERE (title LIKE ?) OR (description LIKE ?) ORDER BY `contest_id` DESC";
   $result = pdo_query($sql,$keyword,$keyword);
 }else{
-  $sql = "SELECT `contest_id`,`title`,`start_time`,`end_time`,`private`,`defunct` FROM `contest` ORDER BY `contest_id` DESC LIMIT $sid, $idsperpage";
+  $sql = "SELECT `contest_id`,`title`,`start_time`,`end_time`,`private`,`defunct`,`type` FROM `contest` ORDER BY `contest_id` DESC LIMIT $sid, $idsperpage";
   $result = pdo_query($sql);
 }
 ?>
@@ -111,6 +111,7 @@ if(isset($_GET['keyword']) && $_GET['keyword']!=""){
       <td><?php echo $MSG_TITLE;?></td>
       <td><?php echo $MSG_START_TIME;?></td>
       <td><?php echo $MSG_END_TIME;?></td>
+      <td><?php echo $MSG_CONTEST_TYPE;?></td>
       <td><?php echo $MSG_Public;?></td>
       <td><?php echo $MSG_STATUS;?></td>
       <td><?php echo $MSG_EDIT;?></td>
@@ -126,6 +127,7 @@ if(isset($_GET['keyword']) && $_GET['keyword']!=""){
       echo "<td><a href='../contest.php?cid=".$row['contest_id']."'>".$row['title']."</a></td>";
       echo "<td>".$row['start_time']."</td>";
       echo "<td>".$row['end_time']."</td>";
+      echo "<td>".($row['type'] == 0 ? "ACM" : "OI")."</td>";
       $cid = $row['contest_id'];
       if(isset($_SESSION[$OJ_NAME.'_'.'administrator'])||isset($_SESSION[$OJ_NAME.'_'."m$cid"])){
         echo "<td><a href=contest_pr_change.php?cid=".$row['contest_id']."&getkey=".$_SESSION[$OJ_NAME.'_'.'getkey'].">".($row['private']=="0"?"<span class='badge badge-info'>$MSG_Public</span>":"<span class='badge badge-warning'>$MSG_Private<span>")."</a></td>";

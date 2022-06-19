@@ -34,12 +34,14 @@ if(isset($_POST['startdate'])){
  
   $title = $_POST['title'];
   $private = $_POST['private'];
+  $type = $_POST['type'];
   $password = $_POST['password'];
   $description = $_POST['description'];
  
   if(false){
     $title = stripslashes($title);
     $private = stripslashes($private);    
+    $type = stripslashes($type);    
     $password = stripslashes($password);
     $description = stripslashes($description);
   }
@@ -62,9 +64,9 @@ if(isset($_POST['startdate'])){
   $description = str_replace(",", "&#44;", $description);
 
 
-  $sql = "UPDATE `contest` SET `title`=?,`description`=?,`start_time`=?,`end_time`=?,`private`=?,`langmask`=?,`password`=? WHERE `contest_id`=?";
+  $sql = "UPDATE `contest` SET `title`=?,`description`=?,`start_time`=?,`end_time`=?,`private`=?,`langmask`=?,`password`=?,`type`=? WHERE `contest_id`=?";
   //echo $sql;
-  pdo_query($sql,$title,$description,$starttime,$endtime,$private,$langmask,$password,$cid);
+  pdo_query($sql,$title,$description,$starttime,$endtime,$private,$langmask,$password,$type,$cid);
 
   $sql = "DELETE FROM `contest_problem` WHERE `contest_id`=?";
   pdo_query($sql,$cid);
@@ -128,6 +130,7 @@ if(isset($_POST['startdate'])){
   $starttime = $row['start_time'];
   $endtime = $row['end_time'];
   $private = $row['private'];
+  $type = $row['type'];
   $password = $row['password'];
   $langmask = $row['langmask'];
   $description = $row['description'];
@@ -219,6 +222,11 @@ if(isset($_POST['startdate'])){
               </select>
               <?php echo $MSG_CONTEST."-".$MSG_PASSWORD?>:
               <input type=text name=password style="width:150px;" value='<?php echo htmlentities($password,ENT_QUOTES,'utf-8')?>'>
+              <?php echo $MSG_CONTEST_TYPE?>:
+              <select name="type" style="width:150px;">
+                <option value=1 <?php echo $type=='1'?'selected=selected':''?>><?php echo $MSG_CONTEST_TYPE_OI?></option>
+                <option value=0 <?php echo $type=='0'?'selected=selected':''?>><?php echo $MSG_CONTEST_TYPE_ACM?></option>
+              </select>
             </p>
           </td>
         </tr>

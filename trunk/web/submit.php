@@ -88,6 +88,7 @@ if ($res[0][1]!='N' && !($test_run||isset($_SESSION[$OJ_NAME.'_'.'administrator'
 }
 
 $title = "";
+$type = "0";
 
 if (isset($_POST['id'])) {
   $id = intval($_POST['id']);
@@ -103,7 +104,7 @@ else if (isset($_POST['pid']) && isset($_POST['cid']) && $_POST['cid']!=0) {
   }
 
   //check user if private
-  $sql = "SELECT `private`,langmask,title FROM `contest` WHERE `contest_id`=$cid AND `start_time`<='$now' AND `end_time`>'$now'";
+  $sql = "SELECT `private`,langmask,title,`type` FROM `contest` WHERE `contest_id`=$cid AND `start_time`<='$now' AND `end_time`>'$now'";
   //"SELECT `private`,langmask FROM `contest` WHERE `contest_id`=? AND `start_time`<=? AND `end_time`>?";
   //$result = pdo_query($sql, $cid, $now, $now);
 
@@ -121,6 +122,7 @@ else if (isset($_POST['pid']) && isset($_POST['cid']) && $_POST['cid']!=0) {
     $isprivate = intval($row[0]);
     $langmask = $row[1];
     $title = $row[2];
+    $type = $row['type']
 
     if ($isprivate==1 && !isset($_SESSION[$OJ_NAME.'_'.'c'.$cid])) {
       $sql = "SELECT count(*) FROM `privilege` WHERE `user_id`=? AND `rightstr`=?";
@@ -327,13 +329,13 @@ if (~$OJ_LANGMASK&(1<<$language)) {
       $redis->auth($OJ_REDISAUTH);
     }
 
-    $redis->lpush($OJ_REDISQNAME, $insert_id);
+    $redis->lpush($OJ_REDISQNAME, $insert_id." ".$type);
     $redis->close();
   }
 }
 
 if (isset($OJ_UDP) && $OJ_UDP) {      
-           trigger_judge($insert_id);     // moved to my_func.inc.php
+           trigger_judge($insert_id,$type);     // moved to my_func.inc.php
 }
 
 if ($OJ_BENCHMARK_MODE) {

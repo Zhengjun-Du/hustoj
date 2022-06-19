@@ -188,6 +188,9 @@
 	$MSG_IP_VERIFICATION="IP验证";
 	$MSG_CONTEST_SUSPECT1="具有多个ID的IP地址。如果在竞赛/考试期间在同一台计算机上访问了多个ID，则会记录该ID。";
 	$MSG_CONTEST_SUSPECT2="具有多个IP地址的ID。 如果在竞赛/考试期间切换到另一台计算机，它将记录下来。";
+	$MSG_CONTEST_TYPE="类型";
+	$MSG_CONTEST_TYPE_OI="OI";
+	$MSG_CONTEST_TYPE_ACM="ACM";
 	
 	$MSG_SECONDS="秒";
 	$MSG_MINUTES="分";

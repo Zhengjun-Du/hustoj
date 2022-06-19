@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS `contest` (
   `langmask` int NOT NULL DEFAULT '0' COMMENT 'bits for LANG to mask',
   `password` CHAR( 16 ) NOT NULL DEFAULT '',
   `user_id` varchar(48) NOT NULL DEFAULT 'admin',
+  `type` int(1) NOT NULL DEFAULT '0', -- 比赛模式 0-ACM_按照通过情况给分 1-OI_按测试点给分 --
   PRIMARY KEY (`contest_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1000 DEFAULT CHARSET=utf8mb4;
 

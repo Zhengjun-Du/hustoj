@@ -24,7 +24,7 @@ if(isset($_POST['manual'])){
              pdo_query($sql,$sid,$reinfo);
         }
 	if (isset($OJ_UDP) && $OJ_UDP) {
-           trigger_judge($sid);
+           trigger_judge($sid, "1");
         }
 	echo "<script>history.go(-1);</script>";
 }
@@ -86,7 +86,7 @@ if(isset($_POST['update_solution'])){
 					$oj_lang_set.=$lang;
 				}
 				
-                $sql="SELECT solution_id FROM solution WHERE language in ($oj_lang_set)
+                $sql="SELECT solution.solution_id, contest.type FROM solution LEFT JOIN contest ON solution.contest_id = contest.contest_id WHERE language in ($oj_lang_set)
                         and (result<2 or (result<4 and NOW()-judgetime>60)) ";
 		if(isset($_SESSION[$OJ_NAME.'_'.'problem_start'])){
 			$start=intval($_SESSION[$OJ_NAME.'_'.'problem_start']);
@@ -100,7 +100,7 @@ if(isset($_POST['update_solution'])){
 		$sql.=" ORDER BY result ASC,solution_id ASC limit $max_running";
                 $result=pdo_query($sql);
                 foreach($result as $row){
-                        echo $row['solution_id']."\n";
+                        echo $row['solution_id']." ".$row['type']."\n";
                 }
                 
         }

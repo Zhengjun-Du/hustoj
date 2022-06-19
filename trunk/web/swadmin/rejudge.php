@@ -47,7 +47,7 @@ if (!(isset($_SESSION[$OJ_NAME.'_'.'administrator']))){
                  $result=pdo_query($sql);
                  foreach($result as $row){
                         echo $row['solution_id']."\n";
-                        $redis->lpush($OJ_REDISQNAME,$row['solution_id']);
+                        $redis->lpush($OJ_REDISQNAME,$row['solution_id']." 1");
                 }
            $redis->close();     
         }

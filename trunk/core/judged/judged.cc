@@ -104,6 +104,14 @@ static MYSQL_ROW row;
 //static FILE *fp_log;
 static char query[BUFFER_SIZE*4];
 #endif
+
+struct JOB {
+	int solution_id;
+	int judge_mode;
+	JOB(int solution_id = 0, int judge_mode = 0) : solution_id(solution_id),
+											judge_mode(judge_mode) { }
+};
+
 void wait_udp_msg(int fd)
 {
     char buf[BUFFER_SIZE];  //......1024..
@@ -248,11 +256,11 @@ void init_judge_conf() {
 #ifdef _mysql_h
 		if (oj_tot==1){
 		sprintf(query,
-			"SELECT solution_id FROM solution WHERE language in (%s) and result<2 ORDER BY solution_id  limit %d",
+			"SELECT solution.solution_id, contest.type FROM solution LEFT JOIN contest ON solution.contest_id = contest.contest_id WHERE solution.language in (%s) and solution.result<2 ORDER BY solution.solution_id  limit %d",
 			oj_lang_set,  2 *max_running );
 		}else{
 		sprintf(query,
-				"SELECT solution_id FROM solution WHERE language in (%s) and result<2 and MOD(solution_id,%d)=%d ORDER BY solution_id ASC limit %d",
+				"SELECT solution.solution_id, contest.type FROM solution LEFT JOIN contest ON solution.contest_id = contest.contest_id WHERE solution.language in (%s) and solution.result<2 and MOD(solution.solution_id,%d)=%d ORDER BY solution.solution_id ASC limit %d",
 				oj_lang_set, oj_tot, oj_mod, 2 *max_running );
 		}
 #endif
@@ -261,8 +269,8 @@ void init_judge_conf() {
 	}
 }
 
-void run_client(int runid, int clientid) {
-	char buf[BUFFER_SIZE], runidstr[BUFFER_SIZE];
+void run_client(int runid, int clientid, int judge_mode) {
+	char buf[BUFFER_SIZE], runidstr[BUFFER_SIZE], judge_mode_str[BUFFER_SIZE];
 	struct rlimit LIM;
 	LIM.rlim_max = 800;
 	LIM.rlim_cur = 800;
@@ -299,6 +307,7 @@ void run_client(int runid, int clientid) {
 	//buf[0]=clientid+'0'; buf[1]=0;
 	sprintf(runidstr, "%d", runid);
 	sprintf(buf, "%d", clientid);
+	sprintf(judge_mode_str, "%d", judge_mode);
 
 	//write_log("sid=%s\tclient=%s\toj_home=%s\n",runidstr,buf,oj_home);
 	//sprintf(err,"%s/run%d/error.out",oj_home,clientid);
@@ -313,13 +322,13 @@ void run_client(int runid, int clientid) {
 		sprintf(docker_v,"%s:/home/judge",oj_home);
 		if(internal_client)
 			execl("/usr/bin/docker","/usr/bin/docker", "container","run" ,"--pids-limit", "100","--rm","--cap-add","SYS_PTRACE", "--net=host",
-				       	"-v", docker_v, "hustoj", "/usr/bin/judge_client", runidstr, buf, (char *) NULL);
+				       	"-v", docker_v, "hustoj", "/usr/bin/judge_client", runidstr, buf, judge_mode_str, (char *) NULL);
 		else
 			execl("/usr/bin/docker","/usr/bin/docker", "container","run" ,"--pids-limit", "100","--rm","--cap-add","SYS_PTRACE", "--net=host", 
-					"-v", docker_v, "hustoj", "/home/judge/src/core/judge_client/judge_client", runidstr, buf, (char *) NULL);
+					"-v", docker_v, "hustoj", "/home/judge/src/core/judge_client/judge_client", runidstr, buf, judge_mode_str, (char *) NULL);
 	}else{
 		execl("/usr/bin/judge_client", "/usr/bin/judge_client", runidstr, buf,
-				oj_home, (char *) NULL);
+				oj_home, judge_mode_str, (char *) NULL);
 	}
 	//else
 	//	execl("/usr/bin/judge_client", "/usr/bin/judge_client", runidstr, buf,
@@ -403,29 +412,35 @@ void login() {
 	}
 
 }
-int _get_jobs_http(int * jobs) {
+int _get_jobs_http(JOB * jobs) {
 	login();
 	int ret = 0;
 	int i = 0;
-	char buf[BUFFER_SIZE];
+	char sid_buff[BUFFER_SIZE];
+	char mode_buff[BUFFER_SIZE];
 	const char * cmd =
 			"wget --post-data=\"getpending=1&oj_lang_set=%s&max_running=%d\" --load-cookies=cookie --save-cookies=cookie --keep-session-cookies -q -O - \"%s%s\"";
 	FILE * fjobs = read_cmd_output(cmd, oj_lang_set, max_running, http_baseurl, http_apipath);
-	while (fscanf(fjobs, "%s", buf) != EOF) {
+	while (fscanf(fjobs, "%s %s", sid_buff, mode_buff) == 2) {
 		//puts(buf);
-		int sid = atoi(buf);
-		if (sid > 0)
-			jobs[i++] = sid;
+		int sid = atoi(sid_buff);
+		int mode = atoi(mode_buff);
+		if (sid > 0) {
+			jobs[i].judge_mode = mode;
+			jobs[i].solution_id = sid;
+			i++;
+		}
 		//i++;
 	}
 	pclose(fjobs);
 	ret = i;
-	while (i <= max_running * 2)
-		jobs[i++] = 0;
+	while (i <= max_running * 2) {
+		jobs[i++].solution_id = 0;
+	}
 	return ret;
 }
 #ifdef _mysql_h
-int _get_jobs_mysql(int * jobs) {
+int _get_jobs_mysql(JOB * jobs) {
 	if (mysql_real_query(conn, query, strlen(query))) {
 		if (DEBUG)
 			write_log("%s", mysql_error(conn));
@@ -436,7 +451,8 @@ int _get_jobs_mysql(int * jobs) {
 	int i = 0;
 	int ret = 0;
 	while (res!=NULL && (row = mysql_fetch_row(res)) != NULL) {
-		jobs[i++] = atoi(row[0]);
+		jobs[i++].solution_id = atoi(row[0]);
+		jobs[i++].judge_mode = atoi(row[1]);
 	}
 
 	if(res!=NULL&&!executesql("commit")){
@@ -445,17 +461,19 @@ int _get_jobs_mysql(int * jobs) {
 	}                        
 	else i=0;
 	ret = i;
-	while (i <= max_running * 2)
-		jobs[i++] = 0;
+	while (i <= max_running * 2) {
+		jobs[i++].solution_id = 0;
+		jobs[i++].judge_mode = 0;
+	}
 	return ret;
 }
 #endif
-int _get_jobs_redis(int * jobs){
+int _get_jobs_redis(JOB * jobs){
         int ret=0;
         const char * cmd="redis-cli -h %s -p %d -a %s --raw rpop %s";
         while(ret<=max_running){
                 FILE * fjobs = read_cmd_output(cmd,oj_redisserver,oj_redisport,oj_redisauth,oj_redisqname);
-                if(fscanf(fjobs,"%d",&jobs[ret])==1){
+                if(fscanf(fjobs,"%d %d",&(jobs[ret].solution_id), &(jobs[ret].judge_mode))==2){
                         ret++;
                         pclose(fjobs);
                 }else{
@@ -465,13 +483,14 @@ int _get_jobs_redis(int * jobs){
 
         }
         int i=ret;
-        while (i <= max_running * 2)
-                jobs[i++] = 0;
+        while (i <= max_running * 2){
+            jobs[i++].solution_id = 0;
+		}
         if(DEBUG) printf("redis return %d jobs",ret);
         return ret;
 }
 
-int get_jobs(int * jobs) {
+int get_jobs(JOB * jobs) {
 	if (http_judge) {
 		return _get_jobs_http(jobs);
 	} else {		
@@ -537,14 +556,15 @@ int work() {
 	int i = 0;
 	static pid_t ID[100];
 	int runid = 0;
-	int jobs[max_running * 2 + 1];
+	int mode = 0;
+	JOB jobs[max_running * 2 + 1];
 	pid_t tmp_pid = 0;
 
 	//for(i=0;i<max_running;i++){
 	//      ID[i]=0;
 	//}
-	for(i=0;i<max_running *2 +1 ;i++)
-		jobs[i]=0;
+	// for(i=0;i<max_running *2 +1 ;i++)
+	// 	jobs[i]=0;
 
 	//sleep_time=sleep_tmp;
 	/* get the database info */
@@ -552,8 +572,9 @@ int work() {
 		return 0;
 	}
 	/* exec the submit */
-	for (int j = 0; jobs[j] > 0; j++) {
-		runid = jobs[j];
+	for (int j = 0; jobs[j].solution_id > 0; j++) {
+		runid = jobs[j].solution_id;
+		mode = jobs[j].judge_mode;
 		if (runid % oj_tot != oj_mod)
 			continue;
 		if (workcnt >= max_running) {           // if no more client can running
@@ -582,7 +603,7 @@ int work() {
 						write_log("Judging solution %d", runid);
 						write_log("<<=sid=%d===clientid=%d==>>\n", runid, i);
 					}
-					run_client(runid, i);    // if the process is the son, run it
+					run_client(runid, i, mode);    // if the process is the son, run it
 					workcnt--;
 					exit(0);
 				}

@@ -37,12 +37,14 @@ if(isset($_POST['startdate'])){
 
   $title = $_POST['title'];
   $private = $_POST['private'];
+  $type = $_POST['type'];
   $password = $_POST['password'];
   $description = $_POST['description'];
   
   if(false){
     $title = stripslashes($title);
     $private = stripslashes($private);
+    $type = stripslashes($type);
     $password = stripslashes($password);
     $description = stripslashes($description);
   }
@@ -56,15 +58,15 @@ if(isset($_POST['startdate'])){
   $langmask = ((1<<count($language_ext))-1)&(~$langmask);
   //echo $langmask; 
 
-  $sql = "INSERT INTO `contest`(`title`,`start_time`,`end_time`,`private`,`langmask`,`description`,`password`,`user_id`)
-          VALUES(?,?,?,?,?,?,?,?)";
+  $sql = "INSERT INTO `contest`(`title`,`start_time`,`end_time`,`private`,`langmask`,`description`,`password`,`user_id`,`type`)
+          VALUES(?,?,?,?,?,?,?,?,?)";
 
   $description = str_replace("<p>", "", $description); 
   $description = str_replace("</p>", "<br />", $description);
   $description = str_replace(",", "&#44; ", $description);
   $user_id=$_SESSION[$OJ_NAME.'_'.'user_id'];
-  echo $sql.$title.$starttime.$endtime.$private.$langmask.$description.$password,$user_id;
-  $cid = pdo_query($sql,$title,$starttime,$endtime,$private,$langmask,$description,$password,$user_id) ;
+  echo $sql.$title.$starttime.$endtime.$private.$langmask.$description.$password,$user_id.$type;
+  $cid = pdo_query($sql,$title,$starttime,$endtime,$private,$langmask,$description,$password,$user_id,$type) ;
   echo "Add Contest ".$cid;
 
   $sql = "DELETE FROM `contest_problem` WHERE `contest_id`=$cid";
@@ -120,6 +122,7 @@ else{
     $title = $row['title']."-Copy";
 
     $private = $row['private'];
+    $type = $row['type'];
     $langmask = $row['langmask'];
     $description = $row['description'];
 
@@ -227,6 +230,11 @@ else{
               </select>
               <?php echo $MSG_CONTEST."-".$MSG_PASSWORD?>:
               <input type=text name=password style="width:150px;" value="">
+              <?php echo $MSG_CONTEST_TYPE?>:
+              <select name="type" style="width:150px;">
+                <option value=1 <?php echo $type=='1'?'selected=selected':''?>><?php echo $MSG_CONTEST_TYPE_OI?></option>
+                <option value=0 <?php echo $type=='0'?'selected=selected':''?>><?php echo $MSG_CONTEST_TYPE_ACM?></option>
+              </select>
             </p>
           </td>
         </tr>

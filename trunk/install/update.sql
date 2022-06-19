@@ -67,4 +67,5 @@ ALTER TABLE `news` ADD COLUMN `menu` int(11) NOT NULL DEFAULT 0 AFTER `importanc
 
 #create fulltext index problem_title_source_index on problem(title,source);
 
-                                                                                                         
+-- 添加比赛模式 0-OI_按测试点给分 1-ACM_按照通过情况给分 --
+ALTER TABLE `contest` ADD COLUMN `type` int(1) NOT NULL DEFAULT '0' AFTER `user_id`;                     

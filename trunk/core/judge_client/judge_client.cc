@@ -548,7 +548,9 @@ void init_judge_conf()   //读取判题主目录etc中的配置文件judge.conf
 			read_buf(buf, "OJ_HTTP_USERNAME", http_username);
 			read_buf(buf, "OJ_HTTP_PASSWORD", http_password);
 			read_int(buf, "OJ_HTTP_DOWNLOAD", &http_download);
-			read_int(buf, "OJ_OI_MODE", &oi_mode);
+			if (!oi_mode) {
+				read_int(buf, "OJ_OI_MODE", &oi_mode);
+			}
 			read_int(buf, "OJ_FULL_DIFF", &full_diff);
 			read_int(buf, "OJ_SHM_RUN", &shm_run);
 			read_int(buf, "OJ_USE_MAX_TIME", &use_max_time);
@@ -3038,38 +3040,49 @@ void clean_workdir(char *work_dir)
 	}
 }
 
+#define ARG_PROGRAM_IDX         0
+#define ARG_SOLUTION_ID_IDX     1
+#define ARG_RUNNER_ID_IDX       2
+#define ARG_JUDGE_MODE_IDX      3
+#define ARG_OJ_HOME_IDX         4
+#define ARG_DEBUG_MODE_IDX      5
+#define ARG_LANG_NAME_IDX       6
+
 void init_parameters(int argc, char **argv, int &solution_id,
 					 int &runner_id)
 {
-	if (argc < 3)
+	if (argc < ARG_OJ_HOME_IDX)
 	{
 		fprintf(stderr,"HUSTOJ judge_client ver 20201127\n\n");
-		fprintf(stderr, "Normal Usage:\n\t%s <solution_id> <runner_id>\n\n", argv[0]);
-		fprintf(stderr, "Multi OJ with Specific home :\n\t%s <solution_id> <runner_id> [judge_base_path].\n\n",
-				argv[0]);
+		fprintf(stderr, "Normal Usage:\n\t%s <solution_id> <runner_id> <judge_mode>\n\n", argv[ARG_PROGRAM_IDX]);
+		fprintf(stderr, "Multi OJ with Specific home :\n\t%s <solution_id> <runner_id> <judge_mode> [judge_base_path].\n\n",
+				argv[ARG_PROGRAM_IDX]);
 		fprintf(stderr,
-				"Debug with Specific home:\n\t%s <solution_id> <runner_id> [judge_base_path] [debug].\n\n",
-				argv[0]);
+				"Debug with Specific home:\n\t%s <solution_id> <runner_id> <judge_mode> [judge_base_path] [debug].\n\n",
+				argv[ARG_PROGRAM_IDX]);
 		fprintf(stderr,"\n\n");
-		fprintf(stderr,"Example:\n\tsudo %s 1001 0 /home/judge/ debug  \n\n",argv[0]);
+		fprintf(stderr,"Example:\n\tsudo %s 1001 0 0 /home/judge/ debug  \n\n",argv[ARG_PROGRAM_IDX]);
 		exit(1);
 	}
-	DEBUG = (argc > 4);
-	record_call = (argc > 5);
-	if (argc > 5)
+
+	DEBUG = (argc > ARG_DEBUG_MODE_IDX);
+	record_call = (argc > ARG_LANG_NAME_IDX);
+	if (argc > ARG_LANG_NAME_IDX)
 	{
-		strcpy(LANG_NAME, argv[5]);
+		strcpy(LANG_NAME, argv[ARG_LANG_NAME_IDX]);
 	}
-	if (argc > 3)
-		strcpy(oj_home, argv[3]);
+	if (argc > ARG_OJ_HOME_IDX)
+		strcpy(oj_home, argv[ARG_OJ_HOME_IDX]);
 	else
 		strcpy(oj_home, "/home/judge");
 
 	if(chdir(oj_home)) exit(-2); // change the dir// init our work
 
-	solution_id = atoi(argv[1]);
-	runner_id = atoi(argv[2]);
+	solution_id = atoi(argv[ARG_SOLUTION_ID_IDX]);
+	runner_id = atoi(argv[ARG_RUNNER_ID_IDX]);
+	oi_mode = atoi(argv[ARG_JUDGE_MODE_IDX]);
 }
+
 int get_sim(int solution_id, int lang, int pid, int &sim_s_id)
 {
 	char src_pth[BUFFER_SIZE];

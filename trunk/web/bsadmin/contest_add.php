@@ -74,6 +74,7 @@ if(isset($_POST['startdate'])){
 
   $title = $_POST['title'];
   $private = $_POST['private'];
+  $type = $_POST['type'];
   $password = $_POST['password'];
   $description = $_POST['description'];
  // $ctype = $_POST['ctype'];         //If there is a type field in the database, it can be turned on
@@ -81,6 +82,7 @@ if(isset($_POST['startdate'])){
   if(false){
     $title = stripslashes($title);
     $private = stripslashes($private);
+    $type = stripslashes($type);
     $password = stripslashes($password);
     $description = stripslashes($description);
   }
@@ -94,18 +96,18 @@ if(isset($_POST['startdate'])){
   $langmask = ((1<<count($language_ext))-1)&(~$langmask);
   //echo $langmask; 
 
-  //$sql = "INSERT INTO `contest`(`title`,`start_time`,`end_time`,`private`,`langmask`,`description`,`password`,`type`,`user_id`) VALUES(?,?,?,?,?,?,?,?,?)";
+  //$sql = "INSERT INTO `contest`(`title`,`start_time`,`end_time`,`private`,`langmask`,`description`,`password`,`type`,`user_id`,`type`) VALUES(?,?,?,?,?,?,?,?,?,?)";
   //If there is a type field in the database, it can be turned on
-  $sql = "INSERT INTO `contest`(`title`,`start_time`,`end_time`,`private`,`langmask`,`description`,`password`,`user_id`) VALUES(?,?,?,?,?,?,?,?)";
+  $sql = "INSERT INTO `contest`(`title`,`start_time`,`end_time`,`private`,`langmask`,`description`,`password`,`user_id`,`type`) VALUES(?,?,?,?,?,?,?,?,?)";
 
   $description = str_replace("<p>", "", $description); 
   $description = str_replace("</p>", "<br />", $description);
   $description = str_replace(",", "&#44; ", $description);
 
-  echo $sql.$title.$starttime.$endtime.$private.$langmask.$description.$password;
+  echo $sql.$title.$starttime.$endtime.$private.$langmask.$description.$password.$type;
   //$cid = pdo_query($sql,$title,$starttime,$endtime,$private,$langmask,$description,$password,$ctype,$_SESSION[$OJ_NAME.'_'.'user_id']) ;
   //If there is a type field in the database, it can be turned on
-  $cid = pdo_query($sql,$title,$starttime,$endtime,$private,$langmask,$description,$password,$_SESSION[$OJ_NAME.'_'.'user_id']) ;
+  $cid = pdo_query($sql,$title,$starttime,$endtime,$private,$langmask,$description,$password,$_SESSION[$OJ_NAME.'_'.'user_id'],$type) ;
   echo "Add Contest ".$cid;
 
   $sql = "DELETE FROM `contest_problem` WHERE `contest_id`=$cid";
@@ -151,6 +153,7 @@ else{
     $title = $row['title']."-Copy";
 
     $private = $row['private'];
+    $type = $row['type'];
     $langmask = $row['langmask'];
     $description = $row['description'];
 
@@ -256,6 +259,11 @@ else{
               </select>
               <?php echo $MSG_CONTEST."-".$MSG_PASSWORD?>:
               <input type=text class=form-control name=password style="display:inline;width:150px;" value='<?php echo htmlentities($password,ENT_QUOTES,'utf-8')?>'>
+              <?php echo $MSG_CONTEST_TYPE?>:
+              <select class="form-control" name=type style="display:inline;width:150px;">
+                <option value=1 <?php echo $type=='1'?'selected=selected':''?>><?php echo $MSG_CONTEST_TYPE_OI?></option>
+                <option value=0 <?php echo $type=='0'?'selected=selected':''?>><?php echo $MSG_CONTEST_TYPE_ACM?></option>
+              </select>
             </p>
           </td>
         </tr>

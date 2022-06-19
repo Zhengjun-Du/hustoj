@@ -92,7 +92,7 @@ function send_udp_message($host, $port, $message)
     // UDP ............, ............
     return true;
 }
-function trigger_judge($solution_id=0){
+function trigger_judge($solution_id=0, $judge_mode=1){
           global $OJ_UDPSERVER,$OJ_UDPPORT,$OJ_JUDGE_HUB_PATH;
           $JUDGE_SERVERS = explode(",",$OJ_UDPSERVER);
           $JUDGE_TOTAL = count($JUDGE_SERVERS);
@@ -108,7 +108,7 @@ function trigger_judge($solution_id=0){
           if(isset($OJ_JUDGE_HUB_PATH))
                 send_udp_message($JUDGE_HOST, $OJ_UDPPORT, $OJ_JUDGE_HUB_PATH);
           else
-                send_udp_message($JUDGE_HOST, $OJ_UDPPORT, $solution_id );
+                send_udp_message($JUDGE_HOST, $OJ_UDPPORT, $solution_id." ".$judge_mode );
 }
 function crypto_rand_secure($min, $max) {
         $range = $max - $min;
