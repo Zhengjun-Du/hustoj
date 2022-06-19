@@ -145,6 +145,8 @@ if(isset($_POST['startdate'])){
   echo "<script>window.location.href=\"contest_list.php\";</script>";
 }
 else{
+  $private = "0";
+  $type = "1";
   if(isset($_GET['cid'])){
     $cid = intval($_GET['cid']);
     $sql = "SELECT * FROM contest WHERE `contest_id`=?";
