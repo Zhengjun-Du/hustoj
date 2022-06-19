@@ -22,16 +22,16 @@
 <script src="https://cdn.bootcss.com/wangEditor/10.0.13/wangEditor.js"></script>
 
 <?php 
-if (!$_SESSION[$OJ_NAME.'_'.'administrator'] && !$_SESSION[$OJ_NAME.'_'.'problem_editor'] && !$_SESSION[$OJ_NAME.'_'.'contest_creator']) {
+if (!isset($_SESSION[$OJ_NAME.'_'.'administrator']) && !isset($_SESSION[$OJ_NAME.'_'.'problem_editor']) && !isset($_SESSION[$OJ_NAME.'_'.'contest_creator'])) {
     $mod = 'hacker';
 }
-if ($_SESSION[$OJ_NAME.'_'.'contest_creator']) {
+if (isset($_SESSION[$OJ_NAME.'_'.'contest_creator'])) {
     $mod = 'contest_creator';
 }
-if ($_SESSION[$OJ_NAME.'_'.'problem_editor']) {
+if (isset($_SESSION[$OJ_NAME.'_'.'problem_editor'])) {
     $mod = 'problem_editor';
 }
-if ($_SESSION[$OJ_NAME.'_'.'administrator']) {
+if (isset($_SESSION[$OJ_NAME.'_'.'administrator'])) {
     $mod = 'administrator';
 }
 if ($mod == 'hacker') {

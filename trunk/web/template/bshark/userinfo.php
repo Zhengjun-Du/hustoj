@@ -30,7 +30,7 @@ foreach ($result as $row) {
     <div class="card">
         <div class="card-body">
               <h5><?php echo $MSG_SUBMIT.$MSG_STATISTICS;?></h5>
-              <?php if ($aflag==0) {?><canvas id="myChart"></canvas><?php } else echo "OI比赛进行中，暂时无法查看"; ?>
+              <?php if (isset($aflag) && $aflag==0) {?><canvas id="myChart"></canvas><?php } else echo "OI比赛进行中，暂时无法查看"; ?>
               <table class="table table-hover" style="width:100%">
                   <tbody>
                       <tr>
@@ -44,7 +44,7 @@ foreach ($result as $row) {
 foreach($view_userstat as $row){
 //i++;
 echo "<tr><th>".$jresult[$row[0]]."</th><td><a href=./status.php?user_id=$user&jresult=".$row[0]." >";
-if ($aflag==0) echo $row[1];
+if (isset($aflag) && $aflag==0) echo $row[1];
 else echo '---';
 echo "</a></td></tr>";
 }
